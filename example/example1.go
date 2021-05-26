@@ -7,8 +7,8 @@ import (
 )
 
 func main() {
-	t := template.New("test")
-	t.SearchPath = []string{"./", "../test_data"}
+	p := []string{"./", "../test_data"}
+	t, _ := template.New("test", template.SearchPath(p...))
 	vars := map[string]interface{}{
 		"a": "a",
 	}

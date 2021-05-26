@@ -1,3 +1,9 @@
+// MIT License, copyright (c) 2021 Johann Kellerman
+
+// Package template implements a wrapper around the Go standard library
+// test/template - https://pkg.go.dev/text/template
+//
+// It includes helpers to render the template and several additional functions
 package template
 
 import (
@@ -11,17 +17,33 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type TemplateOption func(*Template) error
 type Template struct {
 	T          *tmpl.Template
-	SearchPath []string
+	searchPath []string
 	names      map[string]string
 }
 
-// Get an instance of Template (text/template's Template with all funcs added)
-func New(name string) *Template {
-	return &Template{
+// Get an instance of Template (text/template's Template with all functions added)
+func New(name string, options ...TemplateOption) (*Template, error) {
+	t := &Template{
 		T:     tmpl.New(name).Funcs(Funcs).Option("missingkey=error"),
 		names: make(map[string]string),
+	}
+	for _, opt := range options {
+		err := opt(t)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return t, nil
+}
+
+// Add paths to search for templates
+func SearchPath(paths ...string) TemplateOption {
+	return func(t *Template) error {
+		t.searchPath = paths
+		return nil
 	}
 }
 
@@ -33,9 +55,9 @@ func (t *Template) load(name string) error {
 	if filepath.Base(name) != name {
 		return fmt.Errorf("the template name should not include a path, use the search path: %s", name)
 	}
-	for i := len(t.SearchPath) - 1; i >= 0; i-- {
+	for i := len(t.searchPath) - 1; i >= 0; i-- {
 
-		fn := filepath.Join(t.SearchPath[i], name)
+		fn := filepath.Join(t.searchPath[i], name)
 		_, err := t.T.ParseFiles(fn)
 		if os.IsNotExist(err) { // try in next path
 			log.Debugf("template not found: %s\n", fn)
@@ -65,10 +87,12 @@ func execute(tmpl *tmpl.Template, vars map[string]interface{}) (string, error) {
 	return buf.String(), nil
 }
 
+// Execute the template
 func (t *Template) Execute(vars map[string]interface{}) (string, error) {
 	return execute(t.T, vars)
 }
 
+// Execute a specific template
 func (t *Template) ExecuteTemplate(name string, vars map[string]interface{}) (string, error) {
 	err := t.load(name)
 	if err != nil {

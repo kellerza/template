@@ -9,25 +9,20 @@ import (
 	"inet.af/netaddr"
 )
 
-func typeof(val interface{}) string {
-	switch val.(type) {
-	case string:
-		return "string"
-	case int, int16, int32:
-		return "int"
-	}
-	return ""
-}
-
-// interface{} version of parseInt
-func parseInt_i(val interface{}) (int, bool) {
-	if i, err := strconv.Atoi(fmt.Sprintf("%v", val)); err == nil {
-		return i, true
-	}
-	return 0, false
-}
-
-func expectFunc(val interface{}, format string) (interface{}, error) {
+// The expect function tests if the input satisfies a certain type.
+// If successful it returns nothing and will not affect your template
+// If the type fails an error will be raised and template execution stopped
+//
+// Expect can check the following types:
+//
+// • a simple type: str, string, int
+//
+// • and IP address with mask IP/mask
+//
+// • a numeric range 0-100
+//
+// • a regular expression
+func Expect(val interface{}, format string) (interface{}, error) {
 	t := typeof(val)
 	vals := fmt.Sprintf("%s", val)
 
@@ -75,4 +70,34 @@ func expectFunc(val interface{}, format string) (interface{}, error) {
 	}
 
 	return "", nil
+}
+
+// The optional function takes exactly the sameparameters as the expect function
+// If the value is not supplied, the function will return an empty string
+// If a value was supplied, it should match the logic from the expect function
+func Optional(val interface{}, format string) (interface{}, error) {
+	if val == nil {
+		return "", nil
+	}
+	return Expect(val, format)
+}
+
+// interface{} version of parseInt
+// parse an integer from val and return the integer if successful, or false if not
+func parseInt_i(val interface{}) (int, bool) {
+	if i, err := strconv.Atoi(fmt.Sprintf("%v", val)); err == nil {
+		return i, true
+	}
+	return 0, false
+}
+
+// Return the type as a string, simlar to the Javascript typeof() function
+func typeof(val interface{}) string {
+	switch val.(type) {
+	case string:
+		return "string"
+	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
+		return "int"
+	}
+	return ""
 }
