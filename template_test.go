@@ -3,7 +3,7 @@ package template
 import "testing"
 
 func TestExec(t *testing.T) {
-	tm := New("tst")
+	tm, _ := New("tst")
 	tm.T.Parse("{{ .a }}")
 
 	v := map[string]interface{}{
@@ -21,8 +21,7 @@ func TestExec(t *testing.T) {
 }
 
 func TestExecT(t *testing.T) {
-	tm := New("tst")
-	tm.SearchPath = []string{"./test_data"}
+	tm, _ := New("tst", SearchPath("./test_data"))
 
 	v := map[string]interface{}{
 		"a": "a",

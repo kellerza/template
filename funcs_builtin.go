@@ -47,7 +47,7 @@ func indirectInterface(v reflect.Value) reflect.Value {
 }
 
 // indexArg checks if a reflect.Value can be used as an index, and converts it to int if possible.
-func indexArg(index reflect.Value, cap int) (int, error) {
+func indexArg(index reflect.Value, cap1 int) (int, error) {
 	var x int64
 	switch index.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
@@ -61,10 +61,10 @@ func indexArg(index reflect.Value, cap int) (int, error) {
 	}
 
 	if x < 0 {
-		x += int64(cap)
+		x += int64(cap1)
 	}
 
-	if x < 0 || int(x) < 0 || int(x) > cap {
+	if x < 0 || int(x) < 0 || int(x) > cap1 {
 		return 0, fmt.Errorf("index out of range: %d", x)
 	}
 	return int(x), nil

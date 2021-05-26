@@ -7,17 +7,20 @@ import (
 	"strings"
 )
 
+// The following functions will be available when rendering the template.
+//
+// Function slice & index overwrites the standard Go functions, but is compatible to the standard libary
 var Funcs = map[string]interface{}{
-	"optional": optionalFunc,
-	"expect":   expectFunc, // see funcs_expect.go
-	"ip":       ipFunc,
-	"ipmask":   ipMaskFunc,
-	"default":  defaultFunc,
-	"contains": containsFunc,
-	"index":    indexFunc,
-	"join":     joinFunc,
-	"slice":    sliceFunc,
-	"split":    splitFunc,
+	"optional": Optional,
+	"expect":   Expect,
+	"ip":       Ip,
+	"ipmask":   Ipmask,
+	"default":  Default,
+	"contains": Contains,
+	"index":    Index,
+	"join":     Join,
+	"slice":    Slice,
+	"split":    Split,
 }
 
 // Get an int from a relfect.Value and if this was a valid int
@@ -32,27 +35,13 @@ func parseInt(index reflect.Value) (int, bool) {
 	}
 }
 
-func optionalFunc(val interface{}, format string) (interface{}, error) {
-	if val == nil {
-		return "", nil
-	}
-	return expectFunc(val, format)
-}
-
-func containsFunc(substr string, str string) (interface{}, error) {
+// Test is a string contains a substring
+func Contains(substr, str string) (interface{}, error) {
 	return strings.Contains(fmt.Sprintf("%v", str), fmt.Sprintf("%v", substr)), nil
 }
 
-func defaultFunc(in ...interface{}) (interface{}, error) {
-	if len(in) < 2 {
-		return nil, fmt.Errorf("default value expected")
-	}
-	if len(in) > 2 {
-		return nil, fmt.Errorf("too many arguments")
-	}
-
-	val := in[len(in)-1]
-	def := in[0]
+// Return a default value if a value is not available
+func Default(def interface{}, val interface{}) (interface{}, error) {
 
 	switch v := val.(type) {
 	case nil:
@@ -92,7 +81,7 @@ func defaultFunc(in ...interface{}) (interface{}, error) {
 
 // The indexes can either follow the value, or be before the value (suporting pipe)
 // Negative indexes are allowed and will be the offest from the length
-func indexFunc(args ...reflect.Value) (reflect.Value, error) {
+func Index(args ...reflect.Value) (reflect.Value, error) {
 	if len(args) < 2 {
 		return reflect.Value{}, fmt.Errorf("at least 2 parameters expected")
 	}
@@ -120,19 +109,22 @@ func indexFunc(args ...reflect.Value) (reflect.Value, error) {
 	return reflect.Value{}, fmt.Errorf("expected an array, slice, string or map and an index %s %s", args[0].Kind(), args[len(args)-1].Kind())
 }
 
-func ipFunc(val interface{}) (interface{}, error) {
+// Return only the IP address from a value contianing an IP/mask
+func Ip(val interface{}) (interface{}, error) {
 	s := fmt.Sprintf("%v", val)
 	a := strings.Split(s, "/")
 	return a[0], nil
 }
 
-func ipMaskFunc(val interface{}) (interface{}, error) {
+// Return only the mask from a value containing an IP/mask
+func Ipmask(val interface{}) (interface{}, error) {
 	s := fmt.Sprintf("%v", val)
 	a := strings.Split(s, "/")
 	return a[1], nil
 }
 
-func joinFunc(sep string, val reflect.Value) (interface{}, error) {
+// Joins an array of values or slice using the specified seperator
+func Join(sep string, val reflect.Value) (interface{}, error) {
 	if sep == "" {
 		sep = " "
 	}
@@ -154,12 +146,12 @@ func joinFunc(sep string, val reflect.Value) (interface{}, error) {
 }
 
 // Slicing.
-
+//
 // slice returns the result of text/template's [slice](https://golang.org/pkg/text/template/#hdr-Functions)
 // if that fails, it attemps an alternative implementation, the the first 2 parameters
 // are indexes followed by the value.
 // Negative indexes are allowed and will be the offest from the length
-func sliceFunc(item reflect.Value, indexes ...reflect.Value) (reflect.Value, error) {
+func Slice(item reflect.Value, indexes ...reflect.Value) (reflect.Value, error) {
 	// tre the internal function
 	res, err := slice_builtin(item, indexes...)
 	if err == nil {
@@ -190,7 +182,8 @@ func sliceFunc(item reflect.Value, indexes ...reflect.Value) (reflect.Value, err
 	return reflect.Value{}, fmt.Errorf("not an array, string or slice")
 }
 
-func splitFunc(sep string, val interface{}) (interface{}, error) {
+// Split a string using the seperator
+func Split(sep string, val interface{}) (interface{}, error) {
 	// Start and end values
 	if val == nil {
 		return []interface{}{}, nil
