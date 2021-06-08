@@ -107,8 +107,8 @@ func intLike(typ reflect.Kind) bool {
 // argument must be a string, slice, or array.
 func slice_builtin(item reflect.Value, indexes ...reflect.Value) (reflect.Value, error) {
 	var (
-		cap int
-		v   = indirectInterface(item)
+		cap_ int
+		v    = indirectInterface(item)
 	)
 	if !v.IsValid() {
 		return reflect.Value{}, fmt.Errorf("slice of untyped nil")
@@ -121,16 +121,16 @@ func slice_builtin(item reflect.Value, indexes ...reflect.Value) (reflect.Value,
 		if len(indexes) == 3 {
 			return reflect.Value{}, fmt.Errorf("cannot 3-index slice a string")
 		}
-		cap = v.Len()
+		cap_ = v.Len()
 	case reflect.Array, reflect.Slice:
-		cap = v.Cap()
+		cap_ = v.Cap()
 	default:
 		return reflect.Value{}, fmt.Errorf("can't slice item of type %s", v.Type())
 	}
 	// set default values for cases item[:], item[i:].
 	idx := [3]int{0, v.Len()}
 	for i, index := range indexes {
-		x, err := indexArg(index, cap)
+		x, err := indexArg(index, cap_)
 		if err != nil {
 			return reflect.Value{}, err
 		}

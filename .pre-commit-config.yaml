@@ -3,18 +3,11 @@ repos:
     rev: v2.0.0
     hooks:
       - id: codespell
-  - repo: git://github.com/dnephin/pre-commit-golang
-    rev: master
+  - repo: https://github.com/syntaqx/git-hooks
+    rev: v0.0.17
     hooks:
-      - id: go-unit-tests
-      - id: go-mod-tidy
-      # - id: go-fmt
-      # - id: go-vet
-      # - id: go-lint
-      # - id: go-imports
-      # - id: go-cyclo
-      #   args: [-over=15]
-      # - id: validate-toml
-      # - id: no-go-testing
-      # - id: golangci-lint
-      # - id: go-critic
+    - id: forbid-binary
+    - id: go-fmt
+    - id: go-test
+    - id: go-mod-tidy
+    - id: shfmt

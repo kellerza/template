@@ -41,7 +41,7 @@ func Contains(substr, str string) (interface{}, error) {
 }
 
 // Return a default value if a value is not available
-func Default(def interface{}, val interface{}) (interface{}, error) {
+func Default(def, val interface{}) (interface{}, error) {
 
 	switch v := val.(type) {
 	case nil:
