@@ -9,7 +9,7 @@ import (
 
 // The following functions will be available when rendering the template.
 //
-// Function slice & index overwrites the standard Go functions, but is compatible to the standard libary
+// Function slice & index overwrites the standard Go functions, but is compatible to the standard library
 var Funcs = map[string]interface{}{
 	"optional": Optional,
 	"expect":   Expect,
@@ -35,7 +35,7 @@ func parseInt(index reflect.Value) (int, bool) {
 	}
 }
 
-// Test is a string contains a substring
+// Test if a string contains a substring
 func Contains(substr, str string) (interface{}, error) {
 	return strings.Contains(fmt.Sprintf("%v", str), fmt.Sprintf("%v", substr)), nil
 }
@@ -79,8 +79,8 @@ func Default(def interface{}, val interface{}) (interface{}, error) {
 	return val, nil
 }
 
-// The indexes can either follow the value, or be before the value (suporting pipe)
-// Negative indexes are allowed and will be the offest from the length
+// The indexes can either follow the value, or be before the value (supporting pipe)
+// Negative indexes are allowed and will be the offset from the length
 func Index(args ...reflect.Value) (reflect.Value, error) {
 	if len(args) < 2 {
 		return reflect.Value{}, fmt.Errorf("at least 2 parameters expected")
@@ -109,7 +109,7 @@ func Index(args ...reflect.Value) (reflect.Value, error) {
 	return reflect.Value{}, fmt.Errorf("expected an array, slice, string or map and an index %s %s", args[0].Kind(), args[len(args)-1].Kind())
 }
 
-// Return only the IP address from a value contianing an IP/mask
+// Return only the IP address from a value containing an IP/mask
 func Ip(val interface{}) (interface{}, error) {
 	s := fmt.Sprintf("%v", val)
 	a := strings.Split(s, "/")
@@ -123,7 +123,7 @@ func Ipmask(val interface{}) (interface{}, error) {
 	return a[1], nil
 }
 
-// Joins an array of values or slice using the specified seperator
+// Joins an array of values or slice using the specified separator
 func Join(sep string, val reflect.Value) (interface{}, error) {
 	if sep == "" {
 		sep = " "
@@ -148,11 +148,11 @@ func Join(sep string, val reflect.Value) (interface{}, error) {
 // Slicing.
 //
 // slice returns the result of text/template's [slice](https://golang.org/pkg/text/template/#hdr-Functions)
-// if that fails, it attemps an alternative implementation, the the first 2 parameters
+// if that fails, it attempts an alternative implementation, the the first 2 parameters
 // are indexes followed by the value.
-// Negative indexes are allowed and will be the offest from the length
+// Negative indexes are allowed and will be the offset from the length
 func Slice(item reflect.Value, indexes ...reflect.Value) (reflect.Value, error) {
-	// tre the internal function
+	// call the internal function
 	res, err := slice_builtin(item, indexes...)
 	if err == nil {
 		return res, nil
@@ -182,7 +182,7 @@ func Slice(item reflect.Value, indexes ...reflect.Value) (reflect.Value, error) 
 	return reflect.Value{}, fmt.Errorf("not an array, string or slice")
 }
 
-// Split a string using the seperator
+// Split a string using the separator
 func Split(sep string, val interface{}) (interface{}, error) {
 	// Start and end values
 	if val == nil {

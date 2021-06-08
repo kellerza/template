@@ -1,9 +1,12 @@
 // MIT License, copyright (c) 2021 Johann Kellerman
 
 // Package template implements a wrapper around the Go standard library
-// test/template - https://pkg.go.dev/text/template
+// test/template
 //
-// It includes helpers to render the template and several additional functions
+// It includes helpers to render the template and several additional functions.
+// Additional template functions are exposed as public functions, so it shows up
+// in https://pkg.go.dev/github.com/kellerza/template#pkg-functions
+// [pkg.go.dev](https://pkg.go.dev/github.com/kellerza/template#pkg-functions)
 package template
 
 import (
