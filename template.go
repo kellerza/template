@@ -30,7 +30,7 @@ type Template struct {
 // Get an instance of Template (text/template's Template with all functions added)
 func New(name string, options ...TemplateOption) (*Template, error) {
 	t := &Template{
-		T:     tmpl.New(name).Funcs(Funcs).Option("missingkey=error"),
+		T:     tmpl.New(name).Funcs(Funcs),
 		names: make(map[string]string),
 	}
 	for _, opt := range options {
@@ -40,6 +40,11 @@ func New(name string, options ...TemplateOption) (*Template, error) {
 		}
 	}
 	return t, nil
+}
+
+func ErrorOnMissingKey(t *Template) error {
+	t.T.Option("missingkey=error")
+	return nil
 }
 
 // Add paths to search for templates
@@ -81,7 +86,7 @@ func execute(tmpl *tmpl.Template, vars map[string]interface{}) (string, error) {
 	if err != nil {
 		varsP = []byte(fmt.Sprintf("%s", vars))
 	}
-	log.Debugf("execute template %v vars=%v\n", tmpl, varsP)
+	log.Debugf("execute template %s vars=%s\n", tmpl.Name(), varsP)
 	var buf strings.Builder
 	err = tmpl.Execute(&buf, vars)
 	if err != nil {

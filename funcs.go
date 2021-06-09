@@ -167,8 +167,7 @@ func Slice(item reflect.Value, indexes ...reflect.Value) (reflect.Value, error) 
 	if !ok1 || !ok2 {
 		return reflect.Value{}, err
 	}
-	val := indexes[1]
-
+	val := indirectInterface(indexes[1])
 	switch val.Kind() {
 	case reflect.String, reflect.Array, reflect.Slice:
 		if start < 0 {
