@@ -85,28 +85,41 @@ func Index(args ...reflect.Value) (reflect.Value, error) {
 	if len(args) < 2 {
 		return reflect.Value{}, fmt.Errorf("at least 2 parameters expected")
 	}
-	indexes := make([]reflect.Value, len(args)-1)
 
-	// idx=0: support the built-in parameter order
-	// idx=1: support parameter order with value last (to pipe)
-	var item reflect.Value
-	for offs := 0; offs < 2; offs++ {
-		switch offs {
-		case 0:
-			item = indirectInterface(args[(len(args) - 1)])
-		case 1:
-			item = indirectInterface(args[0])
-		}
-		switch item.Kind() {
-		case reflect.Array, reflect.Slice, reflect.String, reflect.Map:
-			for i := 0; i < len(args)-1; i++ {
-				indexes[i] = args[i+offs]
-			}
-			return index_builtin(item, indexes...)
-		}
+	v0 := indirectInterface(args[0])
+	v1 := indirectInterface(args[1])
+	s0 := args[1:]
+	s1 := args[:len(args)-1]
+
+	if v0.Kind() == reflect.Map {
+		return index_builtin(v0, s0...)
+	}
+	if v1.Kind() == reflect.Map {
+		return index_builtin(v1, s1...)
 	}
 
-	return reflect.Value{}, fmt.Errorf("expected an array, slice, string or map and an index %s %s", args[0].Kind(), args[len(args)-1].Kind())
+	switch v1.Kind() {
+	case reflect.Array, reflect.Slice, reflect.String:
+		// allow negative indexes
+		ii := make([]reflect.Value, len(args)-1)
+		for i := 0; i < v1.Len(); i++ {
+			val := indirectInterface(args[i])
+			switch val.Kind() {
+			case reflect.Int, reflect.Int16, reflect.Int8, reflect.Int32, reflect.Int64:
+			default:
+				return index_builtin(v1, s1...)
+			}
+			cv := val.Int()
+			if cv < 0 {
+				cv = cv + int64(v1.Len())
+				ii[i] = reflect.ValueOf(cv)
+			} else {
+				ii[i] = val
+			}
+		}
+		return index_builtin(v1, ii...)
+	}
+	return index_builtin(v0, s0...)
 }
 
 // Return only the IP address from a value containing an IP/mask

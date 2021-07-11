@@ -2,6 +2,7 @@ package template
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 	"testing"
 	"text/template"
@@ -48,11 +49,15 @@ func TestRender1(t *testing.T) {
 		`split "" ""`:                 {"[]"},
 		`split "abc" ""`:              {"[]"},
 
-		`index .iparr 1`: {"32"},               // built in parameter order
-		`index .iparr 2`: {"", "out of range"}, // built in parameter order
-		`index 1 .iparr`: {"32"},               // parameter order for pipe mode
-		`index 1 1`:      {"", "expected"},     // expected array
-		`index 1`:        {"", "at least"},     // too few args
+		`index .iparr 1`:   {"32"},               // built in parameter order
+		`index .iparr -1`:  {"32"},               // built in parameter order
+		`index .iparr -2`:  {"1.1.1.1"},          // built in parameter order
+		`index .iparr 2`:   {"", "out of range"}, // built in parameter order
+		`index 1 .iparr`:   {"32"},               // parameter order for pipe mode
+		`index 1 1`:        {"", "type int"},     // expected array
+		`index 1`:          {"", "at least"},     // too few args
+		`index "a" .map12`: {"1"},
+		`index .map12 "b"`: {"2"},
 
 		`"1.1.1.1/32" | split "/" | index 1`:  {"32"},
 		`"1.1.1.1/32" | split "/" | index -1`: {"32"},
@@ -68,6 +73,7 @@ func TestRender1(t *testing.T) {
 		"dot":   ".",
 		"space": " ",
 		"iparr": []string{"1.1.1.1", "32"},
+		"map12": map[string]string{"a": "1", "b": "2"},
 	}
 
 	for tem, exp := range test_set {
@@ -113,4 +119,14 @@ func test_check(templateS string, vars map[string]interface{}, exp ...string) er
 		return fmt.Errorf(strings.Join(e, "\n"))
 	}
 	return nil
+}
+
+func ExampleIndex() {
+	a := map[string]string{
+		"a": "1",
+		"b": "2",
+	}
+	idx, _ := Index(reflect.ValueOf(a), reflect.ValueOf("a"))
+	fmt.Println(idx)
+	// result: "1"
 }

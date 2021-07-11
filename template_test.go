@@ -1,6 +1,9 @@
 package template
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestExec(t *testing.T) {
 	tm, _ := New("tst")
@@ -35,4 +38,20 @@ func TestExecT(t *testing.T) {
 		t.Errorf("not expected: %s", res)
 	}
 
+}
+
+func ExampleNew() {
+	p := []string{"./", "../test_data"}
+	t, _ := New("test", SearchPath(p...))
+	vars := map[string]interface{}{
+		"a": "a",
+	}
+	tname := "tst.tmpl"
+	fmt.Printf("Rendering %s\n", tname)
+	res, err := t.ExecuteTemplate(tname, vars)
+	if err != nil {
+		fmt.Printf("%v", err)
+		return
+	}
+	fmt.Printf("OK\n%s\n", res)
 }

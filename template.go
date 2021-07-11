@@ -6,7 +6,6 @@
 // It includes helpers to render the template and several additional functions.
 // Additional template functions are exposed as public functions, so it shows up
 // in https://pkg.go.dev/github.com/kellerza/template#pkg-functions
-// [pkg.go.dev](https://pkg.go.dev/github.com/kellerza/template#pkg-functions)
 package template
 
 import (
@@ -42,9 +41,11 @@ func New(name string, options ...TemplateOption) (*Template, error) {
 	return t, nil
 }
 
-func ErrorOnMissingKey(t *Template) error {
-	t.T.Option("missingkey=error")
-	return nil
+func ErrorOnMissingKey() TemplateOption {
+	return func(t *Template) error {
+		t.T.Option("missingkey=error")
+		return nil
+	}
 }
 
 // Add paths to search for templates
