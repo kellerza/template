@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"inet.af/netaddr"
+	"net/netip"
 )
 
 // The expect function tests if the input satisfies a certain type.
@@ -39,7 +39,8 @@ func Expect(val interface{}, format string) (interface{}, error) {
 		}
 		return "", fmt.Errorf("int expected, got %s (%v)", t, val)
 	case "ip":
-		if _, err := netaddr.ParseIPPrefix(vals); err == nil {
+
+		if _, err := netip.ParsePrefix(vals); err == nil {
 			return "", nil
 		}
 		return "", fmt.Errorf("IP/mask expected, got %v", val)
